@@ -1,21 +1,19 @@
-import styled from '@emotion/styled';
-import { css } from '@emotion/react';
-import { useState, useEffect, useRef } from 'react';
-import { shell } from 'electron';
-import path from 'path';
+import { css } from '@emotion/react'
+import styled from '@emotion/styled'
+import { useEffect, useRef, useState } from 'react'
 // https://github.com/justinmc/react-audio-player
-import ReactAudioPlayer from 'react-audio-player';
-import {
-  Input, Button, Form, Space, message
-} from 'antd';
 import {
   ExportOutlined,
-  PlayCircleOutlined,
-  LoadingOutlined
-} from '@ant-design/icons';
-import useAppSetting from '@/hook/app';
-import * as core from '@/utils/core';
-import { TtsFileStatus } from '@/type/enums';
+  LoadingOutlined,
+  PlayCircleOutlined
+} from '@ant-design/icons'
+import {
+  Button, Form, Input, message, Space
+} from 'antd'
+import ReactAudioPlayer from 'react-audio-player'
+import useAppSetting from '@/hook/app'
+import { TtsFileStatus } from '@/type/enums'
+import * as core from '@/utils/core'
 
 const Wrapper = styled.div`
   width: 100%;
@@ -24,14 +22,14 @@ const Wrapper = styled.div`
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-`;
+`
 
 const actionButtonStyle = css`
   display: flex;
   justify-content: space-between;
   height: 115px;
   align-items: center;
-`;
+`
 
 const singleTxtStyle = {
   height: 'calc(100vh - 80px - 115px - 15px) !important',
@@ -40,75 +38,75 @@ const singleTxtStyle = {
   overflow: 'hidden',
   marginBottom: '15px',
   lineHeight: '22px !important'
-};
+}
 
 const Index = () => {
-  const { appSetting, setAppSetting } = useAppSetting();
+  const { appSetting, setAppSetting } = useAppSetting()
 
   const getSingleTxt = () => (appSetting.customSetting.singleTxt
     && appSetting.customSetting.singleTxt !== null
     && appSetting.customSetting.singleTxt.length > 0
     && core.currentSpeaker(appSetting).text !== appSetting.customSetting.singleTxt
     ? appSetting.customSetting.singleTxt
-    : core.currentSpeaker(appSetting).text);
+    : core.currentSpeaker(appSetting).text)
 
-  const [singleTxt] = useState(getSingleTxt());
-  const singleFormRef: any = useRef(null);
-  const [singleTtsFile, setSingleTtsFile] = useState<APP.TtsFileInfo>();
-  const [audioPlayer, setAudioPlayer] = useState<any>();
+  const [singleTxt] = useState(getSingleTxt())
+  const singleFormRef: any = useRef(null)
+  const [singleTtsFile, setSingleTtsFile] = useState<APP.TtsFileInfo>()
+  const [audioPlayer, setAudioPlayer] = useState<any>()
 
   const singleTextChange = (e) => {
     setAppSetting({
       customSetting: Object.assign(appSetting.customSetting, {
         singleTxt: e.target.value
       })
-    });
+    })
 
     setSingleTtsFile({
       textContent: e.target.value,
       status: TtsFileStatus.READY,
       wordCount: 0
-    });
-  };
+    })
+  }
 
-  const [processing, setProcessing] = useState<boolean>(false);
+  const [processing, setProcessing] = useState<boolean>(false)
   const playHandle = async () => {
-    if (!core.ttsRunCheck(appSetting)) return;
+    if (!core.ttsRunCheck(appSetting)) return
 
     if (singleTtsFile?.audioUrl) {
-      core.logger(audioPlayer);
+      core.logger(audioPlayer)
       // 继续播放
-      audioPlayer.audioEl.current.play();
-      return;
+      audioPlayer.audioEl.current.play()
+      return
     }
 
-    const txt = singleFormRef.current.getFieldsValue().singleTxt;
+    const txt = singleFormRef.current.getFieldsValue().singleTxt
     if (core.isNullOrEmpty(txt)) {
-      message.error('请设置合成内容');
+      message.error('请设置合成内容')
     }
     if (
       singleTtsFile?.status
       && singleTtsFile?.status === TtsFileStatus.PROCESS
     ) {
-      message.warn('正在准备播放..');
+      message.warning('正在准备播放..')
     }
 
-    setProcessing(true);
+    setProcessing(true)
 
     core.ttsTasksRun(
       appSetting,
       [{ textContent: txt, status: TtsFileStatus.READY }],
       (current: APP.TtsFileInfo) => {
-        setSingleTtsFile(current);
-        if (current.status === TtsFileStatus.PROCESS) return;
+        setSingleTtsFile(current)
+        if (current.status === TtsFileStatus.PROCESS) return
 
-        setProcessing(false);
+        setProcessing(false)
         if (current.status === TtsFileStatus.FAIL) {
-          message.error(current.error?.message);
+          message.error(current.error?.message)
         }
       }
-    );
-  };
+    )
+  }
 
   const exportHandle = () => {
     if (
@@ -116,20 +114,21 @@ const Index = () => {
       || core.isNullOrEmpty(singleTtsFile)
       || core.isNullOrEmpty(singleTtsFile.audioUrl)
     ) {
-      message.error('没有可导出的内容');
-      return;
+      message.error('没有可导出的内容')
+      return
     }
 
     core.selectDirection('select_export_path', (outPath) => {
-      singleTtsFile.savePath = outPath;
-      singleTtsFile.saveName = `${singleTtsFile.textContent.substring(
-        0,
-        7
-      )}_${new Date().getTime()}.${singleTtsFile.ttsSetting?.format || 'mp3'}`;
-      setSingleTtsFile(singleTtsFile);
-      core.exportAudioFile(singleTtsFile);
-    });
-  };
+      singleTtsFile.savePath = outPath
+      singleTtsFile.saveName = `${appSetting.ttsSetting.engine.toString()}_${
+        core.currentSpeaker(appSetting).speaker
+      }_${singleTtsFile.textContent.substring(0, 7)}_${new Date().getTime()}.${
+        singleTtsFile.ttsSetting?.format || 'mp3'
+      }`
+      setSingleTtsFile(singleTtsFile)
+      core.exportAudioFile(singleTtsFile)
+    })
+  }
 
   useEffect(() => {
     if (
@@ -137,14 +136,14 @@ const Index = () => {
       && singleFormRef.current !== null
       && singleFormRef.current !== undefined
     ) {
-      singleFormRef.current.setFieldsValue({ singleTxt: getSingleTxt() });
+      singleFormRef.current.setFieldsValue({ singleTxt: getSingleTxt() })
       setSingleTtsFile({
         textContent: getSingleTxt(),
         status: TtsFileStatus.READY,
         wordCount: 0
-      });
+      })
     }
-  }, core.ttsUseEffectDeps(appSetting.ttsSetting));
+  }, core.ttsUseEffectDeps(appSetting.ttsSetting))
 
   return (
     <Wrapper>
@@ -201,7 +200,7 @@ const Index = () => {
         </Form.Item>
       </Form>
     </Wrapper>
-  );
-};
+  )
+}
 
-export default Index;
+export default Index

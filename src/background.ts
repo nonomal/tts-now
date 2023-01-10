@@ -150,7 +150,7 @@ app.on('ready', () => {
           | 'home'
           | 'appData'
           | 'userData'
-          | 'cache'
+          | 'sessionData'
           | 'temp'
           | 'exe'
           | 'module'
@@ -281,9 +281,17 @@ const menuTemplate: any = [
     role: 'help',
     submenu: [
       {
+        label: 'SSML标记语言',
+        click: async () => {
+          await shell.openExternal(
+            'https://help.aliyun.com/document_detail/101645.html'
+          )
+        }
+      },
+      {
         label: '帮助',
         click: async () => {
-          await shell.openExternal('https://github.com/funnyzak/tts-now#readme')
+          await shell.openExternal('https://funnyzak.github.io/tts-now')
         }
       },
       {

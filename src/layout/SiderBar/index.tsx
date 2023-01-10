@@ -1,16 +1,15 @@
-import { Button, Affix } from 'antd';
-import { SettingOutlined } from '@ant-design/icons';
-import { css } from '@emotion/react';
-import { useState } from 'react';
-import Header from './Header';
-import Avatar from './Avatar';
-import AudioSet from './Audio';
-import { SetttingDialog } from '../Dialog';
-import styles from './index.module.scss';
+import { SettingOutlined } from '@ant-design/icons'
+import { Affix, Button } from 'antd'
+import { useState } from 'react'
+import { SetttingDialog } from '../Dialog'
+import AudioSet from './Audio'
+import Avatar from './Avatar'
+import Header from './Header'
+import styles from './index.module.scss'
 
 const Index = () => {
-  const [btnBottom] = useState(0);
-  const [showSetting, setShowSetting] = useState(false);
+  const [btnBottom] = useState(0)
+  const [showSetting, setShowSetting] = useState(false)
   return (
     <div className={styles.wrapper}>
       <Affix offsetTop={0}>
@@ -32,7 +31,7 @@ const Index = () => {
             icon={<SettingOutlined />}
             size="large"
             onClick={() => {
-              setShowSetting(true);
+              setShowSetting(true)
             }}
           >
             配置
@@ -42,14 +41,14 @@ const Index = () => {
       {showSetting ? (
         <SetttingDialog
           closeCallBack={() => {
-            setShowSetting(false);
+            setShowSetting(false)
           }}
         />
       ) : (
         <div />
       )}
     </div>
-  );
-};
+  )
+}
 
-export default Index;
+export default Index
